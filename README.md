@@ -83,3 +83,6 @@ returned confirmation to html site console:
 	custom_js adds the dynamic events to communicate with flask when button clicked(sends button label and additional info but this info can stay on only server side and changed with the command from server instead of being sent from player to server to prevent cheating)
 
 map.get_name() for exact map element name or map._name map._id and marker.get_name()
+then add a js code to find the marker on the specific map and remove the old one and plotting the new one.
+To do that, store marker names/ids to an array while plotting and marker.get_name() into a second array which indexes are corresponding to the same element on the names/ids array.(1d arrays easier to deal with)
+So we have flask script that will send update for marker location with marker's name/id and new coordinates for lon and lat. Then we have js code to find the marker names/ids and changes it's coordinates. after changing coordinate it may be required to refresh or render. Not to forget, markers have popups connected to it so it should stay that way even after the update.
