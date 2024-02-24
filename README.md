@@ -1,4 +1,4 @@
-# Gameproject_JS-Python
+# Gameproject_JS-HTML-CSS-PythonFlask
 World map splitted in to countries. Each player will lead a country create buildings and units to compete and fight with each other.
 
 
