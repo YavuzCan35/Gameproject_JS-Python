@@ -1,29 +1,33 @@
 # Gameproject_JS-Python
 World map splitted in to countries. Each player will lead a country create buildings and units to compete and fight with each other.
 
-python-flask will be the serverside computing center and html , js & css for user side interactions and visuals.
+
+	python-flask will be the serverside computing center and html , js & css for user side interactions and visuals.
 
 
-Every country will have certain amount of main cities to build and borders for each of these cities.
+	Every country will have certain amount of main cities to build and borders for each of these cities.
 
-Cities will have certain buildings to produce units.
+	Cities will have certain buildings to produce units.
 
-Units needs to move on the map and coordinates must be updated frequently.
+	Units needs to move on the map and coordinates must be updated frequently.
 
-Leaflet map can be tweaked for visual side. Shout out to leaflet team for their amazing work.
+	Leaflet map can be tweaked for visual side. Shout out to leaflet team for their amazing work.
 
-HTML page is gonna be used for a browser side.
+	HTML page is gonna be used for a browser side.
+
 
 
 1) geoptry.py creates turkey_map.html 
+
+
+		with 5 city plotted on the map 
 	
-	with 5 city plotted on the map 
-	
-	with build, produce unit and cancel options
-	
-	2)app.py runs as flask server and listens send-data node for interaction such as build
+		with build, produce unit and cancel options
+
+2)app.py runs as flask server and listens send-data node for interaction such as build
 
 example message recived on flask side app.py
+
 	127.0.0.1 - - [23/Feb/2024 12:51:42] "POST /send-data HTTP/1.1" 200 -
 	{'cityName': 'Ankara', 'info': 'build'}
 	Received data from the client
@@ -35,14 +39,17 @@ example message recived on flask side app.py
 	127.0.0.1 - - [23/Feb/2024 12:51:43] "POST /send-data HTTP/1.1" 200 -
 	{'cityName': 'Ankara', 'info': 'cancel'}
 	Received data from the client
+ 
 
 returned confirmation to html site console:
+
 	turkey_map.html:48 Fetch finished loading: POST "http://127.0.0.1:5000/send-data".
 	onClickButton @ turkey_map.html:48
 	onclick @ turkey_map.html:227
 	turkey_map.html:57 Data sent successfully: {message: 'Data received successfully'}
 
 3)maindata.py ( creates all_players_data.pickle and players_map.html)
+
 	cities_info.csv contains info for cities and countries location and name
 	gets information from csv file for countries and ciry loactiions (filename is parameter to locate data)
 	creates buildings and costs in the city.building array
