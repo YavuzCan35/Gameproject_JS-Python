@@ -81,3 +81,5 @@ returned confirmation to html site console:
 	CSS make up for buttons and boxes
 
 	custom_js adds the dynamic events to communicate with flask when button clicked(sends button label and additional info but this info can stay on only server side and changed with the command from server instead of being sent from player to server to prevent cheating)
+
+map.get_name() for exact map element name or map._name map._id and marker.get_name()
