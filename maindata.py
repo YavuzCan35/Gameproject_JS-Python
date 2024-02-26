@@ -1,5 +1,7 @@
 import pickle
 import csv
+import time
+
 import folium
 import requests
 class City:
@@ -102,6 +104,7 @@ def get_building_upgrade_cost(building):
     return upgrade_cost
 # Function to create a folium map and plot player coordinates with different colored markers
 def plot_players_on_map(players):
+    global my_map,custom_js,colors
     # Define colors for markers, one for each player
     colors = ['blue', 'green', 'red', 'purple', 'orange', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple',
               'lightred']
@@ -113,6 +116,8 @@ def plot_players_on_map(players):
     my_map = folium.Map(location=[39.9208, 32.8541], zoom_start=2, tiles='OpenStreetMap', min_zoom=2.5 , max_zoom=8, max_bounds=True)
     # Define the bounds for the map
     my_map.fit_bounds([southwest, northeast])
+    my_map_name=my_map.get_name()
+    print(my_map_name)
 
     # Plot the players' cities on the map with different colored markers for each player
     for player_idx, player in enumerate(players):
@@ -144,8 +149,9 @@ def plot_players_on_map(players):
             popup_html += f"<button class='action-btn' onclick='onButtonClicked(event, \"{player.id}\", \"4\", \"{city.latitude}\", \"{city.longitude}\", \"{building.name}\", {building.level})'>Cancel Production</button><br>"
             popup_html += "</div></div></div>"
             player_color = colors[player_idx % len ( colors )]
-            folium.Marker(location=[city.latitude, city.longitude], popup=popup_html,
+            marker=folium.Marker(location=[city.latitude, city.longitude], popup=popup_html,
                           icon=folium.Icon(color=player_color)).add_to(my_map)
+            print(marker.get_name())
 
     # Create a custom CSS style for the popup
     custom_css = """
@@ -225,8 +231,6 @@ def plot_players_on_map(players):
       }
       </script>
       """
-
-
     # Add the custom JavaScript to the map
     my_map.get_root().html.add_child(folium.Element(custom_js))
     # Save the map to an HTML file
@@ -252,7 +256,8 @@ csv_filename = "cities_info.csv"
 city_info = read_city_info_from_csv(csv_filename)
 if __name__ == "__main__":
     # Create 10 players with 1 country each and 5 cities per country using city_info from CSV
-    players = create_players_and_countries_from_csv(num_players=11, num_countries_per_player=1,
+
+    players = create_players_and_countries_from_csv(num_players=20, num_countries_per_player=1,
                                                   num_cities_per_country=5, city_info=city_info)
     # Call the function to plot the players on the map
     plot_players_on_map(players)
@@ -268,3 +273,86 @@ if __name__ == "__main__":
         loaded_players = pickle.load(f)
     # Accessing City and Building information
     print(loaded_players[0].possessed_cities[0].buildings[0].name)
+
+
+    ################################################ experimental zone ####################################
+    time.sleep(15)
+    # Add a new city for the first player (index 0)
+    new_city = City ( "NewCity", 40.0, -80.0 )  # Provide the desired latitude and longitude
+    new_building = Building ( "NewBuilding", 0, 1, {"Supplies": 50, "Components": 25}, 1, ["Infantry"],
+                              {"Supplies": 25} )
+    new_city.buildings = [new_building]
+    players[0].possessed_cities.append ( new_city )
+    city=new_city
+    player_idx = 0
+    player = players[0]
+    # Here, customize the button labels and onclick functions based on your requirements
+    popup_html = f"<div class='popup-container'>"
+    popup_html += f"<h3>Player {player_idx}<br>"
+    popup_html += f"<b>{city.name}</b> ({player.country_name})</div></h3>"
+
+    # Wrapper for "Building info" and "Unit info" sections
+    popup_html += f"<div class='info-wrapper'>"
+    popup_html += "<div class='building-info'>"
+    for building in city.buildings:
+        upgrade_cost = get_building_upgrade_cost ( building )
+        popup_html += f"<b>{building.name}</b> (Level: {building.level})<br>"
+        popup_html += "<b>Upgrade Cost:</b><br>"
+        for resource, cost in upgrade_cost.items ( ):
+            popup_html += f"| {resource}: {cost}<br>"
+        popup_html += f"<button class='action-btn' onclick='onButtonClicked(event, \"{player.id}\", \"1\", \"{city.latitude}\", \"{city.longitude}\", \"{building.name}\", {building.level})'>Upgrade building</button><br>"
+        popup_html += f"<button class='action-btn' onclick='onButtonClicked(event, \"{player.id}\", \"2\", \"{city.latitude}\", \"{city.longitude}\", \"{building.name}\", {building.level})'>Cancel construction</button><br>"
+    popup_html += "</div>"
+
+    popup_html += "<div class='unit-info'>"
+    popup_html += f"<b>Infantry</b>"
+    popup_html += f"</b>(Level: 1)<br>"
+    popup_html += "<b>Production Cost:</b><br>"
+    popup_html += "| Supplies: 50<br>"
+    popup_html += f"<button class='action-btn' onclick='onButtonClicked(event, \"{player.id}\", \"3\", \"{city.latitude}\", \"{city.longitude}\", \"{building.name}\", {building.level})'>Produce Unit</button><br>"
+    popup_html += f"<button class='action-btn' onclick='onButtonClicked(event, \"{player.id}\", \"4\", \"{city.latitude}\", \"{city.longitude}\", \"{building.name}\", {building.level})'>Cancel Production</button><br>"
+    popup_html += "</div></div></div>"
+    player_color = colors[player_idx % len ( colors )]
+    marker = folium.Marker ( location=[city.latitude, city.longitude], popup=popup_html,
+                             icon=folium.Icon ( color=player_color ) ).add_to ( my_map )
+    print ( marker.get_name ( ) )
+
+    my_map.save("players_map.html")
+    custom_js = """
+        <script>
+   
+            // Function to update the marker's position
+            function updateMarker(lat, lng) {
+                marker_name.setLatLng([lat, lng]);
+            }
+            // Function to get marker position from Flask every 5 seconds
+            function getMarkerPosition() {
+                fetch('http://127.0.0.1:5000/get_marker_position')
+                .then(response => response.json())
+                .then(data => {
+                    updateMarker(data.lat, data.lng);
+                })
+                .catch(error => {
+                    console.error('Error fetching marker position:', error);
+                })
+                .finally(() => {
+                    setTimeout(getMarkerPosition, 1000); // Call the function again after 5 seconds
+                });
+            }
+        
+            // Start getting marker position
+            getMarkerPosition();
+        </script>
+        """
+
+    custom_js = custom_js.replace ( "my_map_name", my_map.get_name ( ) )
+
+    custom_js = custom_js.replace ( "marker_name", marker.get_name ( ) )
+    print ( my_map.get_name ( ) )
+    my_map.get_root ( ).html.add_child ( folium.Element ( custom_js ) , index=1)
+
+    my_map.save ( "players_map.html" )
+    print (     my_map.__getstate__() )
+    # Call the function to plot the players on the map
+    #plot_players_on_map(players)
+
